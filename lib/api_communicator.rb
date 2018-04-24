@@ -2,19 +2,14 @@ require 'rest-client'
 require 'json'
 require 'pry'
 
-def get_character_movies_from_api(character)
-  #make the web request
+def get_character(character)
+  #make the web request, returns character hash
   all_characters = RestClient.get('http://www.swapi.co/api/people/')
-  character_hash = JSON.parse(all_characters)
-  found_character = character_hash["results"].find { |character_info|
-  character_info["name"].downcase == character.downcase}
-  if found_character == nil
-    return nil
-  else
-    found_character["films"].collect do |movie|
-       RestClient.get(movie)
-     end
-  end
+  characters_hash = JSON.parse(all_characters)
+  characters_hash["results"].find { |character_info| character_info["name"].downcase == character.downcase}
+  # else
+  #
+  # end
 
   #BAD STUFF WE DID EARLIER
   #movies = nil
@@ -39,24 +34,54 @@ def get_character_movies_from_api(character)
   #  of movies by title. play around with puts out other info about a given film.
 end
 
-def parse_character_movies(films_hash)
+def get_character_height(character_hash)
+  puts character_hash["height"] + " inches"
+end
+
+def get_character_species(character_hash)
+  hash = JSON.parse(RestClient.get(character_hash["species"][0]))
+  puts "#{hash["designation"]} #{hash["name"].downcase}"
+end
+
+def parse_character_movies(character_hash)
   # some iteration magic and puts out the movies in a nice list
-  films_hash.each do |film|
-    puts JSON.parse(film)["title"]
-  end
+  films_hash = character_hash["films"].collect {|movie| RestClient.get(movie)}
+  films_hash.each { |film| puts JSON.parse(film)["title"] }
 end
 
 def show_character_movies(character)
-  films_hash = get_character_movies_from_api(character)
-  if films_hash == nil
+  character_hash = get_character(character)
+  if character_hash == nil
     puts "Character not found"
     return
   else
-    parse_character_movies(films_hash)
+    parse_character_movies(character_hash)
   end
 end
 
-#show_character_movies("luke skywalker")
+def show_character_height(character)
+  character_hash = get_character(character)
+  get_character_height(character_hash)
+end
+
+def show_character_species(character)
+  character_hash = get_character(character)
+  get_character_species(character_hash)
+end
+
+
+
+def choose_method(input_array)
+  if input_array[1].downcase == "height"
+    show_character_height(input_array[0])
+  elsif input_array[1].downcase == "films"
+    show_character_movies(input_array[0])
+  elsif input_array[1].downcase == "species"
+    show_character_species(input_array[0])
+  else
+    puts "WTF mate"
+  end
+end
 
 ## BONUS
 

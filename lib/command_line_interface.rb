@@ -9,8 +9,9 @@ def get_character_from_user
   gets.chomp
 end
 
-def get_character_attribute_from_user
+def get_character_attribute_from_user(character)
   puts "What would you like to know?"
-  puts "\n Height, Eye Color, Films, Species"
-  gets.chomp
+  puts "\n Height, Films, Species"
+  input_array = [character]
+  input_array << gets.chomp
 end
