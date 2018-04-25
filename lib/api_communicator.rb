@@ -1,20 +1,34 @@
 require 'rest-client'
 require 'json'
-require 'pry'
+require 'pry-nav'
+
+def merge_pages
+  characters_hash = []
+  1.upto(9) do |i|
+    binding.pry
+    var = JSON.parse(RestClient.get("https://swapi.co/api/people/?page=#{i}"))["results"]
+  end
+end
 
 def get_character_movies_from_api(character)
   #make the web request
-  all_characters = RestClient.get('http://www.swapi.co/api/people/')
-  character_hash = JSON.parse(all_characters)
-  found_character = character_hash["results"].find { |character_info|
-  character_info["name"].downcase == character.downcase}
-  if found_character == nil
-    return nil
-  else
-    found_character["films"].collect do |movie|
-       RestClient.get(movie)
-     end
+  found_character = nil
+  1.upto(9) do |i|
+    all_characters = RestClient.get("http://www.swapi.co/api/people/?page=#{i}")
+
+    character_hash = JSON.parse(all_characters)
+    character_hash["results"].each do |character_info|
+      if character_info["name"].downcase == character.downcase
+        found_character = character_info
+        #binding.pry
+      end
+    end
   end
+  #binding.pry
+  found_character["films"].collect do |movie|
+    RestClient.get(movie)
+  end
+
 
   #BAD STUFF WE DID EARLIER
   #movies = nil
@@ -56,6 +70,8 @@ def show_character_movies(character)
   end
 end
 
+
+#get_character_movies_from_api("han solo")
 #show_character_movies("luke skywalker")
 
 ## BONUS
